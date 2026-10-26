@@ -251,10 +251,6 @@ Generated code and its tests: `abilities/<name>/v<n>/` (run them with `uv run py
 - 02 Nov 2026 09:00 — YouTube price rises to ₹149 on 04 Nov 2026. Keep it or cancel before then.
 - 05 Nov 2026 09:00 — ICICI LOMBARD renewal ₹15,342.00 is due on 12 Nov. Reply 'paid' when done, or 'snooze 1h'.
 
-## TinyFish (web)
-
-Agent API run (replayed from tests/fixtures/tinyfish/) on https://help.netflix.com/en/node/24926: `{'provider': 'Netflix', 'plan': 'Standard', 'price': 19.99, 'currency': 'USD'}`, stored as a `portal` trace so the task can graduate like any other. (TinyFish proxies have no India exit, so the public page shows US pricing.)
-
 ## Privacy score and cost per simulated month
 
 | period | messages | local code | LLM calls | tokens | privacy score | cost / message (USD) |

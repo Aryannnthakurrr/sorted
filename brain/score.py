@@ -38,7 +38,7 @@ def monthly(s) -> list[dict]:
     out = []
     for month, r in sorted(m.items()):
         if not r["tasks"]:
-            continue  # e.g. a month with only TinyFish portal runs
+            continue  # a month with no message tasks
         tasks = r["tasks"] or 1
         out.append({"month": month, **r, "privacy": r["local"] / tasks, "cost_per_message": r["cost"] / tasks})
     return out

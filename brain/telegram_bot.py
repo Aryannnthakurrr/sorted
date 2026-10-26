@@ -1,7 +1,7 @@
 """Telegram channel (python-telegram-bot). Run: `make bot`.
 
 The first chat to send /start becomes the owner (or set TELEGRAM_OWNER_ID); every other chat is ignored.
-Commands: /start /due /score /abilities /approve <name> /audit /portal <url> [goal] /help.
+Commands: /start /due /score /abilities /approve <name> /audit /help.
 Free text: rule-based replies first (1, done, snooze 1h, paid), then the Planner for track/remind requests,
 then the Chat agent (answers from state only). PDFs sent to the bot go to the Document agent.
 Background jobs in this process: reminders, a nightly compile + classifier retrain, and IMAP polling if set.
@@ -25,7 +25,6 @@ HELP = """Sorted keeps your bills, renewals, subscriptions and medicines.
 /abilities — compiled abilities and their health
 /approve <name> — move a tested ability into shadow mode
 /audit — the last things I did
-/portal <url> [goal] — read a bill page with TinyFish
 Send a PDF bill to file it. Ask anything ("when is my car insurance due?").
 Say "Track Mom's thyroid tablet, 1 every morning, 30 left" to start a medicine tracker.
 Replies: 1 / done (dose taken), snooze 1h, paid [provider]."""
@@ -169,18 +168,6 @@ def main() -> None:
                 await reply(update, fn, *args, pre=pre)
         return handler
 
-    def portal_text(args: str) -> str:
-        from brain.sources import tinyfish
-
-        url, _, goal = args.partition(" ")
-        if not url:
-            return "Usage: /portal <url> [goal]"
-        try:
-            out = tinyfish.portal(url, goal or "Find the amount due and the due date on this bill page.")
-        except tinyfish.NotConfigured as e:
-            return str(e)
-        return f"{'Replayed' if out['replayed'] else 'Live'} TinyFish run: {out['outcome']} {out.get('result')}"
-
     async def text_message(update: Update, context):
         if allowed(update):
             await reply(update, respond, update.message.text, orch, planner)
@@ -225,7 +212,6 @@ def main() -> None:
     app.add_handler(CommandHandler("abilities", command(abilities_text)))
     app.add_handler(CommandHandler("approve", command(approve_text, with_args=True)))
     app.add_handler(CommandHandler("audit", command(audit_text)))
-    app.add_handler(CommandHandler("portal", command(portal_text, with_args=True)))
     app.add_handler(MessageHandler(filters.Document.ALL, document))
     app.add_handler(MessageHandler(filters.PHOTO, photo))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, text_message))

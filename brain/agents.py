@@ -73,7 +73,7 @@ class InboxAgent:
 
 
 class DocumentAgent:
-    """Extracts fields from PDFs and SMS text (and web pages fetched by TinyFish)."""
+    """Extracts fields from PDFs and SMS text (and web pages)."""
 
     TOOLS = ("llm.small", "pdf.read", "state.write_facts")
 

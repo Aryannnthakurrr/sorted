@@ -114,36 +114,6 @@ def cmd_score(args) -> None:
     print(score.summary(config.DEMO_DB_URL if args.demo else None))
 
 
-def cmd_fetch(args) -> None:
-    """TinyFish Fetch (free): a web page through the same pipeline as email."""
-    from brain.sources import tinyfish
-
-    db.init_db()
-    try:
-        msg = tinyfish.fetch_message(args.url)
-    except tinyfish.NotConfigured as e:
-        return print(e)
-    if args.expect_price is not None:
-        seen = tinyfish.price_on_page(msg.body, args.expect_price)
-        print(f"price {args.expect_price} {'found' if seen else 'NOT found'} on {args.url}")
-    _show(msg, _orch().ingest(msg))
-
-
-def cmd_portal(args) -> None:
-    """TinyFish Agent: a goal on a portal page. Replays recorded runs unless TINYFISH_LIVE=1 (uses credits)."""
-    from brain.sources import tinyfish
-
-    db.init_db()
-    try:
-        out = tinyfish.portal(args.url, args.goal, schema=tinyfish.PRICE_SCHEMA if args.price else None,
-                              record=args.record)
-    except tinyfish.NotConfigured as e:
-        return print(e)
-    print(f"{'replayed' if out['replayed'] else 'live'} run -> {out['outcome']}: {out.get('result')}")
-    if out.get("usage"):
-        print(out["usage"])
-
-
 def cmd_due(_args) -> None:
     from brain.telegram_bot import due_text
 
@@ -193,16 +163,6 @@ def main(argv: list[str] | None = None) -> None:
     sp = sub.add_parser("score", help="privacy score and cost per message (live DB; --demo for the simulation)")
     sp.add_argument("--demo", action="store_true")
     sp.set_defaults(fn=cmd_score)
-    sp = sub.add_parser("fetch", help="TinyFish Fetch a page into the pipeline")
-    sp.add_argument("url")
-    sp.add_argument("--expect-price", type=float, help="check that this price appears on the page")
-    sp.set_defaults(fn=cmd_fetch)
-    sp = sub.add_parser("portal", help="TinyFish Agent goal on a portal page (replay unless TINYFISH_LIVE=1)")
-    sp.add_argument("url")
-    sp.add_argument("goal")
-    sp.add_argument("--price", action="store_true", help="use the price schema instead of the bill schema")
-    sp.add_argument("--record", action="store_true", help="save the live response to tests/fixtures/tinyfish")
-    sp.set_defaults(fn=cmd_portal)
     sub.add_parser("due", help="what is due in the next 7 days (no LLM)").set_defaults(fn=cmd_due)
     sp = sub.add_parser("say", help="send a chat message as if on Telegram (replies, planner, chat)")
     sp.add_argument("text", nargs="+")

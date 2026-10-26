@@ -99,7 +99,7 @@ class Trace(Base):
     __tablename__ = "traces"
     id: Mapped[int] = mapped_column(primary_key=True)
     run_id: Mapped[str] = mapped_column(String(40))
-    task_kind: Mapped[str] = mapped_column(String(40))  # classify / extract / chat / compile / portal
+    task_kind: Mapped[str] = mapped_column(String(40))  # classify / extract / chat / compile
     input_ref: Mapped[int | None] = mapped_column(ForeignKey("source_records.id"))
     output_json: Mapped[dict] = mapped_column(JSON, default=dict)
     handler: Mapped[str] = mapped_column(String(80))  # "llm" or "ability:<name>@v<n>"
