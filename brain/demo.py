@@ -28,7 +28,7 @@ END = date.fromisoformat(json.loads((ROOT / "data" / "samples" / "dataset.json")
 os.environ.update({
     "BRAIN_DB_URL": f"sqlite:///{ROOT / 'data' / 'demo.db'}",  # the simulation never touches the live DB
     "BRAIN_MODEL_DIR": str(DEMO / "models"),
-    "BRAIN_ABILITIES_DIR": str(ROOT / "abilities"),  # committed: the code the demo compiled, for judges to read
+    "BRAIN_ABILITIES_DIR": str(ROOT / "abilities"),  # committed so the code the demo compiled can be read
     "BRAIN_SHADOW_RUNS": "1",  # demo only: one matching shadow run instead of the default 2
     "BRAIN_DATE_OFFSET": str((END - CANON_END).days),
 })

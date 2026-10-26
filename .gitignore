@@ -13,3 +13,6 @@ __pycache__/
 
 .DS_Store
 *.db.bak*
+
+# per-machine bot state
+data/telegram_owner
