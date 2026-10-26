@@ -46,6 +46,15 @@ stateDiagram-v2
     Degraded --> Candidate: new examples, compile v(n+1)
 ```
 
+A compiled skill, as the dashboard shows it: its path from LLM solves to local runs, the code the AI wrote, and
+its test cases, including one held out from the compiler:
+
+![A compiled skill with its code and test cases](docs/screenshots/3-a-compiled-skill.png)
+
+When a sender changes its layout, the skill fails validation, the LLM takes over again, and v2 is compiled:
+
+![A skill degrading and being recompiled as v2](docs/screenshots/4-self-repair.png)
+
 The same loop applies beyond parsing messages:
 
 - **Questions:** "Any doctor appointments this month?" first goes to the LLM, which turns it into a typed query.
@@ -67,6 +76,8 @@ Measured on a synthetic dataset of six months of household mail (81 messages) in
 [`data/samples/`](data/samples). Full output is in [`reports/demo_run.md`](reports/demo_run.md) and
 [`reports/eval.md`](reports/eval.md).
 
+![Privacy score and cost per message by month](docs/screenshots/1-privacy-and-cost.png)
+
 | Month | Messages | Handled by compiled skills | LLM calls | Privacy score |
 |---|---|---|---|---|
 | 1 | 10 | 0 | 10 | 0% |
@@ -85,6 +96,12 @@ Measured on a synthetic dataset of six months of household mail (81 messages) in
   [`abilities/`](abilities).
 - **Extraction accuracy:** 100% on type, provider and due date, and 98.6% on amount. The data is
   template-generated, so a real inbox will be harder.
+
+Month by month, the work moves from the AI to compiled code:
+
+![Six simulated months, from all-AI to compiled skills](docs/screenshots/2-month-by-month-learning.png)
+
+![Every skill Sorted taught itself](docs/screenshots/5-skills-learned.png)
 
 ## Getting started
 
@@ -202,6 +219,10 @@ bearer token from `BRAIN_INGEST_TOKENS`, so an SMS forwarder on your phone can p
 - **Approval and audit:** no skill goes live without your approval, and every write is recorded in an audit
   log.
 - **Local data:** `.env` and the database are git-ignored. All sample data is synthetic.
+
+A bill email as the AI and the compiled skills see it, with the card number masked:
+
+![A bill email after redaction](docs/screenshots/6-redaction.png)
 
 ## Project layout
 
