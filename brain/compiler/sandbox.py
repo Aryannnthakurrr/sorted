@@ -1,16 +1,22 @@
 """Run generated code in a separate subprocess: empty environment (no API keys, no proxies), sockets
 disabled before the ability is imported, CPU/file-size rlimits, a temp working directory and a timeout.
 
+On Windows there are no rlimits; the timeout bounds CPU use, and the AST check already forbids file access.
+
 ponytail: process-level isolation only. A Docker `--network none` container is the planned upgrade.
 """
 
 import json
 import os
-import resource
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+try:
+    import resource
+except ImportError:  # Windows
+    resource = None
 
 RUNNER = r'''
 import io, json, socket, sys
@@ -45,13 +51,15 @@ def _limits():
 def run(code: str, inputs: list[str], timeout: float = 15.0) -> list[dict]:
     """[{ok: True, value: ...} | {ok: False, error: str}] per input."""
     with tempfile.TemporaryDirectory(prefix="sorted-sandbox-") as tmp:
-        Path(tmp, "ability.py").write_text(code)
-        Path(tmp, "runner.py").write_text(RUNNER)
-        env = {"PATH": os.defpath, "PYTHONDONTWRITEBYTECODE": "1", "LANG": "C.UTF-8"}
+        Path(tmp, "ability.py").write_text(code, encoding="utf-8")
+        Path(tmp, "runner.py").write_text(RUNNER, encoding="utf-8")
+        env = {"PATH": os.defpath, "PYTHONDONTWRITEBYTECODE": "1", "LANG": "C.UTF-8", "PYTHONIOENCODING": "utf-8"}
+        if os.name == "nt":
+            env["SYSTEMROOT"] = os.environ.get("SYSTEMROOT", r"C:\Windows")  # Python can't start without it
         try:
             proc = subprocess.run([sys.executable, "-I", str(Path(tmp, "runner.py")), tmp], input=json.dumps(inputs),
-                                  capture_output=True, text=True, cwd=tmp, env=env, timeout=timeout,
-                                  preexec_fn=_limits)
+                                  capture_output=True, text=True, encoding="utf-8", cwd=tmp, env=env,
+                                  timeout=timeout, preexec_fn=_limits if resource else None)
         except subprocess.TimeoutExpired:
             return [{"ok": False, "error": f"timeout after {timeout}s"} for _ in inputs]
         if proc.returncode != 0:

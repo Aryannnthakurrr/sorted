@@ -14,10 +14,11 @@ from brain.messages import sim_sample
 def test_generated_timeline_ends_on_the_given_date(tmp_path):
     end = date(2031, 3, 15)
     n = samples.generate(tmp_path / "s", tmp_path / "labels.jsonl", end)
-    labels = [json.loads(line) for line in (tmp_path / "labels.jsonl").read_text().splitlines()]
+    labels = [json.loads(line) for line in (tmp_path / "labels.jsonl").read_text(encoding="utf-8").splitlines()]
     assert n == len(labels) == 81
     assert all(sim_sample(lab["id"] + ".eml") for lab in labels)  # every id is Sim-month prefixed
-    rows = [json.loads(line) for line in (tmp_path / "s" / "sms" / "sms.jsonl").read_text().splitlines()]
+    sms = (tmp_path / "s" / "sms" / "sms.jsonl").read_text(encoding="utf-8")
+    rows = [json.loads(line) for line in sms.splitlines()]
     last = max(datetime.fromisoformat(r["received_at"]).date() for r in rows)
     assert last <= end and (end - last).days < 31
     shifted = {lab["id"]: lab["due_date"] for lab in labels}
@@ -48,7 +49,7 @@ def test_replay_by_cache_key_moves_dates_with_the_timeline(tmp_path, monkeypatch
     rec = {"data": {"due_date": "2026-05-02", "amount": 10.0}, "tokens": 5, "cost": 0.0, "model": "m",
            "date_offset": 0}
     name = hashlib.sha256(json.dumps(["small", "sys", "Out", "extract:m1_x"]).encode()).hexdigest()
-    (tmp_path / f"{name}.json").write_text(json.dumps(rec))
+    (tmp_path / f"{name}.json").write_text(json.dumps(rec), encoding="utf-8")
     monkeypatch.setenv("BRAIN_DATE_OFFSET", "30")
     monkeypatch.setenv("OPENAI_API_KEY", "")
     monkeypatch.setenv("CEREBRAS_API_KEY", "")

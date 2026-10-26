@@ -36,7 +36,7 @@ def test_agent_never_goes_live_by_default(monkeypatch):
 def test_recorded_agent_run_replays_and_is_stored_as_trace(monkeypatch):
     monkeypatch.setenv("TINYFISH_LIVE", "0")
     monkeypatch.setattr(httpx, "post", lambda *a, **k: pytest.fail("no live call during replay"))
-    rec = json.loads(RECORDED.read_text())
+    rec = json.loads(RECORDED.read_text(encoding="utf-8"))
     out = tf.portal(rec["url"], rec["goal"], schema=tf.PRICE_SCHEMA)
     assert out["replayed"] and out["result"] == rec["response"]["result"]
     with db.Session() as s:

@@ -149,7 +149,8 @@ def test_engine_and_web_api(tmp_path, make_llm, monkeypatch):
 
     llm.json = json_with_key
     engine = Engine(llm=llm, data_dir=tmp_path)
-    labels.update({(r := json.loads(line))["id"]: r for line in config.LABELS_PATH.read_text().splitlines()})
+    lines = config.LABELS_PATH.read_text(encoding="utf-8").splitlines()
+    labels.update({(r := json.loads(line))["id"]: r for line in lines})
     client = TestClient(create_app(engine))
     st = client.get("/api/state").json()
     assert st["status"]["delivered"] == 0 and st["status"]["month"] == 1
@@ -247,7 +248,7 @@ def test_autopilot_runs_the_whole_demo_saying_yes(tmp_path, make_llm, monkeypatc
     monkeypatch.setattr(scheduler, "now", scheduler.now)
     monkeypatch.setattr(notify, "SINKS", [])
     monkeypatch.setattr(notify, "ASK_SINKS", [])
-    labels = {(r := json.loads(line))["id"]: r for line in config.LABELS_PATH.read_text().splitlines()}
+    labels = {(r := json.loads(line))["id"]: r for line in config.LABELS_PATH.read_text(encoding="utf-8").splitlines()}
     current = {}
 
     def answer(user, schema):

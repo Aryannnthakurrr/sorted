@@ -60,8 +60,7 @@ Measured on a synthetic dataset of six months of household mail (81 messages) in
 
 ## Getting started
 
-You need Python 3.12, [uv](https://docs.astral.sh/uv/), and Linux or macOS. The code sandbox relies on Unix
-resource limits, so on Windows run it under WSL.
+You need Python 3.12 and [uv](https://docs.astral.sh/uv/). Sorted runs on Linux, macOS and Windows.
 
 ```bash
 git clone https://github.com/Aryannnthakurrr/sorted.git
@@ -69,6 +68,20 @@ cd sorted
 make setup   # install dependencies, create .env and the SQLite database
 make demo    # replay six simulated months, no API key needed
 ```
+
+On Windows without `make`, run the commands it wraps:
+
+```powershell
+uv sync
+copy .env.example .env
+uv run brain init
+uv run python -m brain.demo      # make demo
+uv run python -m brain.web       # make sim
+uv run python -m brain.telegram_bot   # make bot
+uv run pytest -q                 # make test
+```
+
+On Windows the code sandbox can't set CPU and file-size limits, so it relies on the timeout and the static check.
 
 `make demo` replays recorded LLM responses from [`data/llm_cache/`](data/llm_cache), so it runs offline. To use
 live models, set `OPENAI_API_KEY` and/or `CEREBRAS_API_KEY` in `.env` and run `make demo-live`. Either key works
